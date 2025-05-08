@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="light sidebar-visible" dir="ltr">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -8,7 +8,7 @@
 
 
         <!-- Custom HTML head -->
-
+        
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff">
@@ -25,29 +25,26 @@
         <link rel="stylesheet" href="fonts/fonts.css">
 
         <!-- Highlight.js Stylesheets -->
-        <link rel="stylesheet" id="highlight-css" href="highlight.css">
-        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css">
-        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css">
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
 
-
-        <!-- Provide site root and default themes to javascript -->
-        <script>
-            const path_to_root = "";
-            const default_light_theme = "light";
-            const default_dark_theme = "navy";
-        </script>
-        <!-- Start loading toc.js asap -->
-        <script src="toc.js"></script>
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
         <script>
             try {
-                let theme = localStorage.getItem('mdbook-theme');
-                let sidebar = localStorage.getItem('mdbook-sidebar');
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
 
                 if (theme.startsWith('"') && theme.endsWith('"')) {
                     localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
@@ -61,22 +58,24 @@
 
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script>
-            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
-            let theme;
+            var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            const html = document.documentElement;
+            var html = document.querySelector('html');
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add("js");
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
 
         <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            let sidebar = null;
-            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
@@ -84,25 +83,45 @@
                 sidebar = 'hidden';
             }
             sidebar_toggle.checked = sidebar === 'visible';
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <!-- populated by js -->
-            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
-            <noscript>
-                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
-            </noscript>
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="requirements.html">System Requirements</a></li><li class="chapter-item expanded affix "><a href="quickstart.html">Quickstart</a></li><li class="chapter-item expanded affix "><a href="howtos/INDEX.html">How to Guide</a></li><li class="chapter-item expanded "><a href="howtos/no-os.html"><strong aria-hidden="true">1.</strong> Installing on a machine with no operating system</a></li><li class="chapter-item expanded "><a href="howtos/custom-kexec.html"><strong aria-hidden="true">2.</strong> Using your own kexec image</a></li><li class="chapter-item expanded "><a href="howtos/secrets.html"><strong aria-hidden="true">3.</strong> Secrets and full disk encryption</a></li><li class="chapter-item expanded "><a href="howtos/use-without-flakes.html"><strong aria-hidden="true">4.</strong> Use without flakes</a></li><li class="chapter-item expanded "><a href="howtos/terraform.html"><strong aria-hidden="true">5.</strong> Terraform</a></li><li class="chapter-item expanded "><a href="howtos/nix-path.html"><strong aria-hidden="true">6.</strong> Nix-channels / NIX_PATH</a></li><li class="chapter-item expanded "><a href="howtos/ipv6.html"><strong aria-hidden="true">7.</strong> IPv6-only targets</a></li><li class="chapter-item expanded affix "><a href="reference.html">Reference</a></li></ol>
+            </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
             </div>
         </nav>
 
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
                         <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -112,7 +131,6 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
@@ -170,6 +188,8 @@
 <li>NixOS</li>
 <li>Windows systems using WSL2.</li>
 </ul>
+<p><em>Note</em>: Should be able to build nix derivations for the target platform.
+Otherwise <code>--build-on-remote</code> can be used.</p>
 </li>
 <li>
 <p><strong>Nix Installation:</strong> If Nix is not yet installed on your system, refer to
@@ -256,11 +276,7 @@ line that reads:</p>
             "CHANGE"
 </code></pre>
 <p>Replace the text <code>CHANGE</code> with your own SSH key. This is crucial, as you will
-not be able to log into the target machine post-installation without it. If you
-have a .pem file you can run</p>
-<pre><code class="language-bash">ssh-keygen -y -f /path/to/your/key.pem
-</code></pre>
-<p>then paste the result in between the quotes like "ssh-rsa AAA..."</p>
+not be able to log into the target machine post-installation without it.</p>
 <h3 id="4-configure-storage"><a class="header" href="#4-configure-storage">4. Configure Storage</a></h3>
 <p>In the same directory, create a file called <code>disk-config.nix</code>. This file will
 define the disk layout for the
@@ -273,7 +289,7 @@ compatible with both EFI and BIOS systems and mounts the disk as <code>/dev/sda<
 may need to adjust <code>/dev/sda</code> to match the correct disk on your machine. To
 identify the disk, run the <code>lsblk</code> command and replace <code>sda</code> with the actual
 disk name.</p>
-<p>For example, on this machine, we would select <code>/dev/nvme0n1</code> as the disk:</p>
+<p>For example, on this machine, we would select <code>nvme0n1</code> as the disk:</p>
 <pre><code>NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
 nvme0n1     259:0    0  1.8T  0 disk
 </code></pre>
@@ -286,7 +302,7 @@ For more detailed information, refer to the
 <pre><code>nix flake lock
 </code></pre>
 <p>This will download your flake dependencies and make a <code>flake.lock</code> file that
-describes how to reproducibly build your system.</p>
+describes how to reproducably build your system.</p>
 <p>Optionally, you can commit these files to a repo such as Github, or you can
 simply reference your local directory when you run <strong>nixos-anywhere</strong>. This
 example uses a local directory on the source machine.</p>
@@ -385,19 +401,19 @@ containing <code>flake.nix</code> and <code>disk-config.nix</code></p>
 <p><code>&lt;ip address&gt;</code> is the IP address of the target machine.</p>
 </li>
 </ul>
-<pre><code>nix run github:nix-community/nixos-anywhere -- --flake &lt;path to configuration&gt;#&lt;configuration name&gt; --target-host root@&lt;ip address&gt;
+<pre><code>nix run github:nix-community/nixos-anywhere -- --flake &lt;path to configuration&gt;#&lt;configuration name&gt; root@&lt;ip address&gt;
 </code></pre>
 <p>The command would look  like this if you had created your files in a directory
 named <code>/home/mydir/test</code> and the IP address of your target machine is
 <code>37.27.18.135</code>:</p>
-<pre><code>nix run github:nix-community/nixos-anywhere -- --flake /home/mydir/test#hetzner-cloud --target-host root@37.27.18.135
+<pre><code>nix run github:nix-community/nixos-anywhere -- --flake /home/mydir/test#hetzner-cloud root@37.27.18.135
 </code></pre>
 <p>If you also need to generate hardware configuration amend flags for
 nixos-generate-config:</p>
-<pre><code>nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-generate-config ./hardware-configuration.nix --flake &lt;path to configuration&gt;#&lt;configuration name&gt; --target-host root@&lt;ip address&gt;
+<pre><code>nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-generate-config ./hardware-configuration.nix --flake &lt;path to configuration&gt;#&lt;configuration name&gt; root@&lt;ip address&gt;
 </code></pre>
 <p>Or these flags if you are using nixos-facter instead:</p>
-<pre><code>nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-facter ./facter.json  --flake &lt;path to configuration&gt;#&lt;configuration name&gt; --target-host root@&lt;ip address&gt;
+<pre><code>nix run github:nix-community/nixos-anywhere -- --generate-hardware-config nixos-facter ./facter.json  --flake &lt;path to configuration&gt;#&lt;configuration name&gt; root@&lt;ip address&gt;
 </code></pre>
 <p>Adjust the location of <code>./hardware-configuration.nix</code> and <code>./facter.json</code>
 accordingly.</p>
@@ -443,8 +459,7 @@ reference this flake when using the NixOS <code>nixos-rebuild</code> command or 
 3rd party deployment tool of your choice i.e.
 <a href="https://github.com/serokell/deploy-rs">deploy-rs</a>,
 <a href="https://github.com/zhaofengli/colmena">colmena</a>,
-<a href="https://github.com/MatthewCroughan/nixinate">nixinate</a>,
-<a href="https://clan.lol/">clan</a> (author's choice).</p>
+<a href="https://github.com/MatthewCroughan/nixinate">nixinate</a>.</p>
 <p>To update on the machine locally (replace <code>&lt;URL to your flake&gt;</code> with your flake
 i.e. <code>.#</code> if your flake is in the current directory):</p>
 <pre><code>nixos-rebuild switch --flake &lt;URL to your flake&gt;
@@ -467,8 +482,6 @@ explanation of known error messages, refer to the
 <p><a href="howtos/./INDEX.html">Documentation Index</a></p>
 <h2 id="contents"><a class="header" href="#contents">Contents</a></h2>
 <p><a href="howtos/./no-os.html">Installing on a machine with no operating system</a></p>
-<p><a href="howtos/./limited-ram.html">Kexec on systems with limited RAM</a></p>
-<p><a href="howtos/./extra-files.html">Copying files to the new installation</a></p>
 <p><a href="howtos/./custom-kexec.html">Using your own kexec image</a></p>
 <p><a href="howtos/./disko-modes.html">Repair installations without wiping data</a></p>
 <p><a href="howtos/./secrets.html">Secrets and full disk encryption</a></p>
@@ -525,7 +538,7 @@ SSH command (replace the IP address with your own):</p>
 <pre><code>ssh -v nixos@fec0::5054:ff:fe12:3456
 </code></pre>
 <p>You can then use the IP address to run <code>nixos-anywhere</code> like this:</p>
-<pre><code>nix run github:nix-community/nixos-anywhere -- --flake '.#myconfig' --target-host nixos@fec0::5054:ff:fe12:3456
+<pre><code>nix run github:nix-community/nixos-anywhere -- --flake '.#myconfig' nixos@fec0::5054:ff:fe12:3456
 </code></pre>
 <p>This example assumes a flake in the current directory containing a configuration
 named <code>myconfig</code>.</p>
@@ -596,7 +609,7 @@ pass ssh_host_ed25519_key &gt; "$temp/etc/ssh/ssh_host_ed25519_key"
 chmod 600 "$temp/etc/ssh/ssh_host_ed25519_key"
 
 # Install NixOS to the host system with our secrets
-nixos-anywhere --extra-files "$temp" --flake '.#your-host' --target-host root@yourip
+nixos-anywhere --extra-files "$temp" --flake '.#your-host' root@yourip
 </code></pre>
 <h2 id="example-uploading-disk-encryption-secrets"><a class="header" href="#example-uploading-disk-encryption-secrets">Example: Uploading Disk Encryption Secrets</a></h2>
 <p>In a similar vein, <code>nixos-anywhere</code> can upload disk encryption secrets, which
@@ -659,8 +672,8 @@ same directory as <code>disko-config.nix</code>.</p>
 <h2 id="3-set-nixos-version-to-use"><a class="header" href="#3-set-nixos-version-to-use">3. Set NixOS version to use</a></h2>
 <pre><code class="language-nix"># default.nix
 let
-  # replace nixos-24.11 with your preferred nixos version or revision from here: https://status.nixos.org/
-  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-24.11.tar.gz";
+  # replace nixos-24.05 with your preferred nixos version or revision from here: https://status.nixos.org/
+  nixpkgs = fetchTarball "https://github.com/NixOS/nixpkgs/archive/refs/heads/nixos-24.05.tar.gz";
 in
 import (nixpkgs + "/nixos/lib/eval-config.nix") {
   modules = [ ./configuration.nix ];
@@ -679,7 +692,7 @@ import (nixpkgs + "/nixos/lib/eval-config.nix") {
 
   # Set this to the NixOS version that you have set in the previous step.
   # For more information, see `man configuration.nix` or https://nixos.org/manual/nixos/stable/options#opt-system.stateVersion .
-  system.stateVersion = "24.11";
+  system.stateVersion = "24.05";
 }
 </code></pre>
 <h2 id="5-build-and-deploy-with-nixos-anywhere"><a class="header" href="#5-build-and-deploy-with-nixos-anywhere">5. Build and deploy with nixos-anywhere</a></h2>
@@ -690,7 +703,7 @@ step:</p>
 <code>hardware-configuration.nix</code></li>
 </ul>
 <p>Run <code>nixos-anywhere</code> as follows:</p>
-<pre><code class="language-bash">nixos-anywhere --store-paths $(nix-build -A config.system.build.formatScript -A config.system.build.toplevel --no-out-link) root@machine
+<pre><code class="language-bash">nixos-anywhere --store-paths $(nix-build -A config.system.build.disko -A config.system.build.toplevel --no-out-link) root@machine
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="terraform"><a class="header" href="#terraform">Terraform</a></h1>
 <p>The nixos-anywhere terraform modules allow you to use Terraform for installing
@@ -774,24 +787,18 @@ possible to use an IPv6 proxy for GitHub content like that:</p>
 <p><a href="reference.html#explanation-of-known-error-messages">Explanation of known error messages</a></p>
 <h2 id="command-line-usage"><a class="header" href="#command-line-usage">Command Line Usage</a></h2>
 <!-- `$ bash ./src/nixos-anywhere.sh --help` -->
-<pre><code>Usage: nixos-anywhere [options] [&lt;ssh-host&gt;]
+<pre><code>Usage: nixos-anywhere [options] &lt;ssh-host&gt;
 
 Options:
 
 * -f, --flake &lt;flake_uri&gt;
-  set the flake to install the system from. i.e.
-  nixos-anywhere --flake .#mymachine
-  Also supports variants:
-  nixos-anywhere --flake .#nixosConfigurations.mymachine.config.virtualisation.vmVariant
-* --target-host &lt;ssh-host&gt;
-  set the SSH target host to deploy onto.
+  set the flake to install the system from.
 * -i &lt;identity_file&gt;
   selects which SSH private key file to use.
 * -p, --ssh-port &lt;ssh_port&gt;
   set the ssh port to connect with
 * --ssh-option &lt;ssh_option&gt;
-  set one ssh option, no need for the '-o' flag, can be repeated.
-  for example: '--ssh-option UserKnownHostsFile=./known_hosts'
+  set an ssh option
 * -L, --print-build-logs
   print full build logs
 * --env-password
@@ -804,18 +811,13 @@ Options:
   use another kexec tarball to bootstrap NixOS
 * --kexec-extra-flags
   extra flags to add into the call to kexec, e.g. "--no-sync"
-* --ssh-store-setting &lt;key&gt; &lt;value&gt;
-  ssh store settings appended to the store URI, e.g. "compress true". &lt;value&gt; needs to be URI encoded.
 * --post-kexec-ssh-port &lt;ssh_port&gt;
   after kexec is executed, use a custom ssh port to connect. Defaults to 22
 * --copy-host-keys
   copy over existing /etc/ssh/ssh_host_* host keys to the installation
 * --extra-files &lt;path&gt;
-  contents of local &lt;path&gt; are recursively copied to the root (/) of the new NixOS installation. Existing files are overwritten
-  Copied files will be owned by root unless specified by --chown option. See documentation for details.
-* --chown &lt;path&gt; &lt;ownership&gt;
-  change ownership of &lt;path&gt; recursively. Recommended to use uid:gid as opposed to username:groupname for ownership.
-  Option can be specified more than once.
+  path to a directory to copy into the root of the new nixos installation.
+  Copied files will be owned by root.
 * --disk-encryption-keys &lt;remote_path&gt; &lt;local_path&gt;
   copy the contents of the file or pipe in local_path to remote_path in the installer environment,
   after kexec but before installation. Can be repeated.
@@ -823,8 +825,6 @@ Options:
   disable passing --substitute-on-destination to nix-copy
 * --debug
   enable debug output
-* --show-trace
-  show nix build traces
 * --option &lt;key&gt; &lt;value&gt;
   nix option to pass to every nix related command
 * --from &lt;store-uri&gt;
@@ -845,15 +845,8 @@ Options:
 * --disko-mode disko|mount|format
   set the disko mode to format, mount or destroy. Default is disko.
   disko: first unmount and destroy all filesystems on the disks we want to format, then run the create and mount mode
-* --no-disko-deps
-  This will only upload the disko script and not the partitioning tools dependencies.
-  Installers usually have dependencies available.
-  Use this option if your target machine has not enough RAM to store the dependencies in memory.
-* --build-on auto|remote|local
-  sets the build on settings to auto, remote or local. Default is auto.
-  auto: tries to figure out, if the build is possible on the local host, if not falls back gracefully to remote build
-  local: will build on the local host
-  remote: will build on the remote host
+  mount: mount the partition at the specified root-mountpoint
+  format: create partition tables, zpools, lvms, raids and filesystems (Experimental: Can be run increntally, but use with caution and good backups)
 </code></pre>
 <h2 id="explanation-of-known-error-messages"><a class="header" href="#explanation-of-known-error-messages">Explanation of known error messages</a></h2>
 <p>TODO: Add additional error messages and meanings. Fill in missing explanations</p>
